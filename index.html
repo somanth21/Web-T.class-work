@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Book Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 250px;
+            right: 0;
+            height: 60px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .welcome-text {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #34565e;
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            background-image: url('https://i.pinimg.com/originals/a6/ac/92/a6ac9244c02998a5dcce22c324d8d8a4.gif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 20px 0;
+        }
+
+        .nav-links li {
+            margin: 0;
+        }
+
+        .nav-links a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px 20px;
+            border-bottom: 1px solid #2c3e50;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background-color: #2c3e50;
+        }
+
+        .main-frame {
+            margin-left: 250px;
+            margin-top: 60px;
+            width: calc(100% - 250px);
+            height: calc(100vh - 60px);
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <div class="logo">
+                <img src="https://www.shutterstock.com/image-vector/hand-keep-book-read-source-600nw-1127076767.jpg" alt="Bookstore Logo" style="height:40px; vertical-align:middle;">
+            </div>
+            <div class="welcome-text">Welcome to Online Book Store</div>
+        </div>
+
+        <nav class="sidebar">
+            <ul class="nav-links">
+                <li><a href="home.html" target="mainFrame" class="nav-link active" onclick="setActive(this)">Home</a></li>
+                <li><a href="login.html" target="mainFrame" class="nav-link" onclick="setActive(this)">Login</a></li>
+                <li><a href="registration.html" target="mainFrame" class="nav-link" onclick="setActive(this)">Registration</a></li>
+                <li><a href="catalogue.html" target="mainFrame" class="nav-link" onclick="setActive(this)">Catalogue</a></li>
+                <li><a href="cart.html" target="mainFrame" class="nav-link" onclick="setActive(this)">Cart</a></li>
+                <li><a href="payment.html" target="mainFrame" class="nav-link" onclick="setActive(this)">Payment</a></li>
+            </ul>
+        </nav>
+
+        <iframe name="mainFrame" src="home.html" class="main-frame" frameborder="0"></iframe>
+    </div>
+
+    <script>
+        function setActive(clickedLink) {
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+            
+            
+            clickedLink.classList.add('active');
+        }
+
+        
+        window.cart = [];
+        
+        
+        window.addToCart = function(title, price, author) {
+            const existingItem = window.cart.find(item => item.title === title);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                window.cart.push({
+                    title: title,
+                    price: price,
+                    author: author || 'Unknown Author',
+                    quantity: 1
+                });
+            }
+            
+            localStorage.setItem('bookCart', JSON.stringify(window.cart));
+        };
+
+        window.updateQuantity = function(title, change) {
+            const item = window.cart.find(item => item.title === title);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    window.removeFromCart(title);
+                } else {
+                    localStorage.setItem('bookCart', JSON.stringify(window.cart));
+                    const frame = document.querySelector('iframe[name="mainFrame"]');
+                    
+                    if (frame.contentWindow.updateCartDisplay && frame.contentWindow.location.pathname.endsWith('cart.html')) {
+                        frame.contentWindow.updateCartDisplay();
+                    }
+                }
+            }
+        };
+
+        window.removeFromCart = function(title) {
+            window.cart = window.cart.filter(item => item.title !== title);
+            localStorage.setItem('bookCart', JSON.stringify(window.cart));
+            const frame = document.querySelector('iframe[name="mainFrame"]');
+            if (frame.src.includes('cart.html')) {
+                frame.contentWindow.updateCartDisplay();
+            }
+        };
+
+        window.getCartTotal = function() {
+            return window.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        };
+
+        window.clearCart = function() {
+            window.cart = [];
+            localStorage.removeItem('bookCart');
+        };
+
+        window.onload = function() {
+            const savedCart = localStorage.getItem('bookCart');
+            if (savedCart) {
+                window.cart = JSON.parse(savedCart);
+            }
+        };
+    </script>
+</body>
+</html>

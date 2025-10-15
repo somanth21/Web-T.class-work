@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            background-color: #f5f5f5;
+            margin: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background-image: url('https://i.pinimg.com/originals/64/05/31/6405318ac146473a95bfbdcec2b32943.gif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .cart-table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .cart-table th,
+        .cart-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .cart-table th {
+            background-color: #34495e;
+            color: white;
+        }
+
+        .total-section {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .total-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity-btn {
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .quantity-btn:hover {
+            background-color: #7f8c8d;
+        }
+
+        .empty-cart {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        .btn {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+        }
+
+        .btn-success:hover {
+            background-color: #229954;
+        }
+    </style>
+</head>
+<body>
+    <h2>Shopping Cart</h2>
+    <div id="cartContent">
+        <div class="empty-cart">Your cart is empty</div>
+    </div>
+
+    <script>
+        function updateCartDisplay() {
+            const cartContent = document.getElementById('cartContent');
+            const cart = parent.cart || [];
+            
+            if (cart.length === 0) {
+                cartContent.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
+                return;
+            }
+            
+            let total = 0;
+            let tableHTML = `
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Amount</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            cart.forEach(item => {
+                const amount = item.price * item.quantity;
+                total += amount;
+                
+                tableHTML += `
+                    <tr>
+                        <td>
+                            <div>
+                                <strong>${item.title}</strong><br>
+                                <small style="color: #7f8c8d;">by ${item.author}</small>
+                            </div>
+                        </td>
+                        <td>$${item.price.toFixed(2)}</td>
+                        <td>
+                            <div class="quantity-controls">
+                                <button class="quantity-btn" onclick="parent.updateQuantity('${item.title}', -1)">-</button>
+                                <span>${item.quantity}</span>
+                                <button class="quantity-btn" onclick="parent.updateQuantity('${item.title}', 1)">+</button>
+                            </div>
+                        </td>
+                        <td>$${amount.toFixed(2)}</td>
+                        <td><button class="btn" onclick="parent.removeFromCart('${item.title}')" style="background-color: #e74c3c;">Remove</button></td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+                <div class="total-section">
+                    <div class="total-amount">Total: $${total.toFixed(2)}</div>
+                    <button class="btn btn-success" onclick="proceedToPayment()">Pay Now</button>
+                </div>
+            `;
+            
+            cartContent.innerHTML = tableHTML;
+        }
+
+        function proceedToPayment() {
+            if (parent.cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+            
+            
+            localStorage.setItem('totalAmount', parent.getCartTotal().toFixed(2));
+            parent.document.querySelector('a[href="payment.html"]').click();
+        }
+
+        
+        window.onload = function() {
+            updateCartDisplay();
+        };
+    </script>
+</body>
+</html>
